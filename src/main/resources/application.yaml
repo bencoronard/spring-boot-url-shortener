@@ -20,11 +20,6 @@ spring:
     vault:
       uri: "${VAULT_URI}"
       token: "${URL_SHORTENER_VAULT_TOKEN}"
-      authentication: TOKEN
-      kv:
-        enabled: true
-        backend: secret
-        default-context: application
 
 management:
   endpoints:
@@ -40,8 +35,16 @@ management:
   otlp:
     metrics:
       export:
-        url: "${OTLP_METRICS_URL}"
-        step: "${OTLP_METRICS_FREQ_IN_MIN}"
+        url: "${OTLP_METRICS_ENDPOINT}"
+        step: "${METRICS_SAMPLING_FREQ_IN_MIN}"
+  tracing:
+    sampling:
+      probability: "${TRACES_SAMPLING_PROBABILITY}"
+  zipkin:
+    tracing:
+      export:
+        enabled: true
+      endpoint: "${ZIPKIN_TRACES_ENDPOINT}"
 
 ---
 # Environment: LOCAL
@@ -64,6 +67,10 @@ management:
     metrics:
       export:
         enabled: false
+  zipkin:
+    tracing:
+      export:
+        enabled: false
 
 ---
 # Environment: TEST
@@ -82,5 +89,9 @@ spring:
 management:
   otlp:
     metrics:
+      export:
+        enabled: false
+  zipkin:
+    tracing:
       export:
         enabled: false
