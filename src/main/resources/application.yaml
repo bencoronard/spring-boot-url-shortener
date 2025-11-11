@@ -1,0 +1,81 @@
+server:
+  port: "${APP_LISTEN_PORT}"
+
+spring:
+  application:
+    name: url-shortener
+  profiles:
+    active: "${APP_ENVIRONMENT}"
+  threads:
+    virtual:
+      enabled: true
+  sql:
+    init:
+      mode: never
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  cloud:
+    vault:
+      uri: "${VAULT_URI}"
+      token: "${URL_SHORTENER_VAULT_TOKEN}"
+      authentication: TOKEN
+      kv:
+        enabled: true
+        backend: secret
+        default-context: application
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+        - health
+        - info
+        - metrics
+  info:
+    env:
+      enabled: true
+
+---
+# Environment: LOCAL
+spring:
+  config:
+    activate:
+      on-profile: local
+  jpa:
+    show-sql: true
+  cloud:
+    vault:
+      enabled: false
+
+# logging:
+#   level:
+#     root: debug
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+
+---
+# Environment: TEST
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: jdbc:h2:mem:localdb
+    username: sa
+    password:
+  cloud:
+    vault:
+      enabled: false
+
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
