@@ -37,6 +37,11 @@ management:
   info:
     env:
       enabled: true
+  otlp:
+    metrics:
+      export:
+        url: "${OTLP_METRICS_URL}"
+        step: "${OTLP_METRICS_FREQ_IN_MIN}"
 
 ---
 # Environment: LOCAL
