@@ -6,8 +6,6 @@ import dev.hireben.url_shortener.auth.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -29,20 +27,17 @@ import lombok.NoArgsConstructor;
 public class UrlMapping {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  @Column(length = 6)
+  private String shortUrlPath;
 
   @Column(nullable = false, updatable = false, length = 255)
   private String originalUrl;
-
-  @Column(nullable = false, unique = true, updatable = false, length = 255)
-  private String shortUrl;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "created_by", nullable = false, updatable = false)
   private User createdBy;
 
-  @Column(nullable = false, updatable = false, length = 255)
+  @Column(nullable = false, updatable = false)
   private Instant createdAt;
 
 }

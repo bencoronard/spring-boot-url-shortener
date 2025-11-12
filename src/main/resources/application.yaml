@@ -27,6 +27,10 @@ spring:
   h2:
     console:
       enabled: true
+  data:
+    web:
+      pageable:
+        max-page-size: "${URL_SHORTENER_PAGINATION_MAX_SIZE}"
 
 management:
   endpoints:
@@ -60,6 +64,8 @@ internal:
     token-ttl-in-sec: "${URL_SHORTENER_TOKEN_TTL_SEC}"
   auth:
     dummy-psw-hash: "${URL_SHORTENER_BCRYPT_DUMMY_HASH}"
+  host:
+    external-url: "${URL_SHORTENER_EXTERNAL_URL}"
 
 ---
 # Environment: LOCAL
