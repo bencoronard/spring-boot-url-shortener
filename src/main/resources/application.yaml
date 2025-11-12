@@ -46,6 +46,11 @@ management:
         enabled: true
       endpoint: "${ZIPKIN_TRACES_ENDPOINT}"
 
+internal:
+  jwt:
+    sign-key-path: "${URL_SHORTENER_PRIVATE_KEY_PATH}"
+    verify-key-path: "${URL_SHORTENER_PUBLIC_KEY_PATH}"
+
 ---
 # Environment: LOCAL
 spring:
@@ -78,20 +83,3 @@ spring:
   config:
     activate:
       on-profile: test
-  datasource:
-    url: jdbc:h2:mem:localdb
-    username: sa
-    password:
-  cloud:
-    vault:
-      enabled: false
-
-management:
-  otlp:
-    metrics:
-      export:
-        enabled: false
-  zipkin:
-    tracing:
-      export:
-        enabled: false
