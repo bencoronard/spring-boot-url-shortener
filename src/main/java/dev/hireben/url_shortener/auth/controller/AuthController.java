@@ -1,4 +1,4 @@
-package dev.hireben.url_shortener.auth;
+package dev.hireben.url_shortener.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;

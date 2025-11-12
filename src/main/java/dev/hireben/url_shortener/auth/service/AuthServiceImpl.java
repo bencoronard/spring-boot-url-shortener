@@ -1,4 +1,4 @@
-package dev.hireben.url_shortener.auth;
+package dev.hireben.url_shortener.auth.service;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -14,7 +14,6 @@ import dev.hireben.url_shortener.auth.exception.InvalidCredentialsException;
 import dev.hireben.url_shortener.auth.exception.UserAlreadyExistsException;
 import dev.hireben.url_shortener.auth.repository.PermissionRepository;
 import dev.hireben.url_shortener.auth.repository.UserRepository;
-import dev.hireben.url_shortener.auth.service.AuthService;
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtIssuer;
 import lombok.RequiredArgsConstructor;
 
