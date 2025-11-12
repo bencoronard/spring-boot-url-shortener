@@ -4,8 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.hireben.url_shortener.auth.dto.LoginDTO;
-import dev.hireben.url_shortener.auth.dto.RegisterDTO;
+import dev.hireben.url_shortener.auth.dto.LoginRequestBody;
+import dev.hireben.url_shortener.auth.dto.RegisterRequestBody;
 import dev.hireben.url_shortener.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ final class AuthController {
 
   @PostMapping("/register")
   ResponseEntity<Void> register(
-      @Valid @RequestBody RegisterDTO body) {
+      @Valid @RequestBody RegisterRequestBody body) {
 
     authService.register(body.email(), body.password());
 
@@ -34,7 +34,7 @@ final class AuthController {
 
   @PostMapping("/login")
   ResponseEntity<String> login(
-      @Valid @RequestBody LoginDTO body) {
+      @Valid @RequestBody LoginRequestBody body) {
 
     String token = authService.login(body.email(), body.password());
 
