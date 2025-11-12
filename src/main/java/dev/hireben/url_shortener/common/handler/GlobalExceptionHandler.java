@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import dev.hireben.url_shortener.auth.exception.UserAlreadyExistsException;
 import dev.hireben.url_shortener.common.exception.ApplicationException;
 import io.jsonwebtoken.JwtException;
 import io.micrometer.tracing.Tracer;
@@ -36,7 +37,8 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
   final Tracer tracer;
 
-  static final Map<Class<? extends Throwable>, HttpStatus> exceptionStatusMap = Map.of();
+  static final Map<Class<? extends Throwable>, HttpStatus> exceptionStatusMap = Map.of(
+      UserAlreadyExistsException.class, HttpStatus.CONFLICT);
 
   // =============================================================================
 
@@ -172,6 +174,23 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     HttpStatus status = exceptionStatusMap.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
 
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
+
+    return createResponseEntity(problemDetail, HttpHeaders.EMPTY, status, request);
+  }
+
+  // -----------------------------------------------------------------------------
+
+  @ExceptionHandler(Exception.class)
+  ResponseEntity<Object> catchAllException(
+      Exception ex,
+      WebRequest request) {
+
+    HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status,
+        "An unhandled error occured at the server side");
+
+    logger.error("Unhandled exception caught", ex);
 
     return createResponseEntity(problemDetail, HttpHeaders.EMPTY, status, request);
   }

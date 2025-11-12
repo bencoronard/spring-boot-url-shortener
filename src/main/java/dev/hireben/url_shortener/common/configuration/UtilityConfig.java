@@ -11,6 +11,9 @@ import java.security.spec.InvalidKeySpecException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import dev.hireben.url_shortener.common.utility.crypto.KeyReader;
 import dev.hireben.url_shortener.common.utility.jwt.JwtClients;
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtIssuer;
@@ -44,6 +47,13 @@ class UtilityConfig {
     PublicKey publicKey = KeyReader.readRsaPublicKeyX509(keyBase64);
 
     return JwtClients.newVerifierWithPublicKey(publicKey);
+  }
+
+  // -----------------------------------------------------------------------------
+
+  @Bean
+  PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 
 }

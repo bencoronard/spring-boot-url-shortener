@@ -20,6 +20,13 @@ spring:
     vault:
       uri: "${VAULT_URI}"
       token: "${URL_SHORTENER_VAULT_TOKEN}"
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
 
 management:
   endpoints:
@@ -50,6 +57,9 @@ internal:
   jwt:
     sign-key-path: "${URL_SHORTENER_PRIVATE_KEY_PATH}"
     verify-key-path: "${URL_SHORTENER_PUBLIC_KEY_PATH}"
+    token-ttl-in-sec: "${URL_SHORTENER_TOKEN_TTL_SEC}"
+  auth:
+    dummy-psw-hash: "${URL_SHORTENER_BCRYPT_DUMMY_HASH}"
 
 ---
 # Environment: LOCAL
