@@ -42,8 +42,6 @@ services:
       ZIPKIN_TRACES_ENDPOINT: http://zipkin:9411/api/v2/spans
       METRICS_SAMPLING_FREQ_IN_MIN: 1m
       TRACES_SAMPLING_PROBABILITY: 1.0
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
       URL_SHORTENER_VAULT_TOKEN: hvs.gMaRKCO9sBfTsLOnhxIBRO1S
       URL_SHORTENER_PRIVATE_KEY_PATH: /mnt/keys/rsa-private-pkcs8.pem
       URL_SHORTENER_PUBLIC_KEY_PATH: /mnt/keys/rsa-public-x509.pem
