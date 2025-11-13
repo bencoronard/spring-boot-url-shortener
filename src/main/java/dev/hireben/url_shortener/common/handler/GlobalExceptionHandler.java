@@ -24,8 +24,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import dev.hireben.url_shortener.auth.exception.InvalidCredentialsException;
 import dev.hireben.url_shortener.auth.exception.UserAlreadyExistsException;
 import dev.hireben.url_shortener.common.exception.ApplicationException;
+import dev.hireben.url_shortener.common.exception.InsufficientPermissionException;
+import dev.hireben.url_shortener.common.exception.TokenMalformedException;
 import io.jsonwebtoken.JwtException;
 import io.micrometer.tracing.Tracer;
 import jakarta.validation.ConstraintViolationException;
@@ -38,6 +41,9 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   final Tracer tracer;
 
   static final Map<Class<? extends Throwable>, HttpStatus> exceptionStatusMap = Map.of(
+      TokenMalformedException.class, HttpStatus.UNAUTHORIZED,
+      InsufficientPermissionException.class, HttpStatus.FORBIDDEN,
+      InvalidCredentialsException.class, HttpStatus.UNAUTHORIZED,
       UserAlreadyExistsException.class, HttpStatus.CONFLICT);
 
   // =============================================================================
@@ -171,7 +177,7 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       ApplicationException ex,
       WebRequest request) {
 
-    HttpStatus status = exceptionStatusMap.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
+    HttpStatus status = exceptionStatusMap.getOrDefault(ex.getClass(), HttpStatus.I_AM_A_TEAPOT);
 
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
 
