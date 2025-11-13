@@ -20,6 +20,13 @@ spring:
     vault:
       uri: "${VAULT_URI}"
       token: "${URL_SHORTENER_VAULT_TOKEN}"
+      fail-fast: true
+      kv:
+        profiles: "${spring.profiles.active}"
+        application-name: "${spring.application.name}"
+        default-context: application
+  config:
+    import: vault://
   data:
     web:
       pageable:
@@ -78,9 +85,6 @@ spring:
       on-profile: local
   jpa:
     show-sql: true
-  cloud:
-    vault:
-      enabled: false
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;
     username: sa

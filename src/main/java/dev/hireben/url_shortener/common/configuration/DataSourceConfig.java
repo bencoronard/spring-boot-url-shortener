@@ -16,11 +16,11 @@ final class DataSourceConfig {
 
   @Bean
   private DataSource datasource(
-      @Value("${}") String pgHost,
-      @Value("${}") String pgPort,
-      @Value("${}") String pdDbName,
-      @Value("${}") String pgUsername,
-      @Value("${}") String pgPassword,
+      @Value("${pg.host}") String pgHost,
+      @Value("${pg.port}") String pgPort,
+      @Value("${pg.dbname}") String pgDbName,
+      @Value("${pg.user}") String pgUsername,
+      @Value("${pg.pass}") String pgPassword,
       @Value("${spring.datasource.hikari.pool-name}") String cpPoolName,
       @Value("${spring.datasource.hikari.maximum-pool-size}") Integer cpPoolSize,
       @Value("${spring.datasource.hikari.minimum-idle}") Integer cpPoolMinIdle,
@@ -30,7 +30,7 @@ final class DataSourceConfig {
 
     HikariConfig config = new HikariConfig();
     config.setDriverClassName("org.postgresql.Driver");
-    config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", pgHost, pgPort, pdDbName));
+    config.setJdbcUrl(String.format("jdbc:postgresql://%s:%s/%s", pgHost, pgPort, pgDbName));
     config.setUsername(pgUsername);
     config.setPassword(pgPassword);
 
