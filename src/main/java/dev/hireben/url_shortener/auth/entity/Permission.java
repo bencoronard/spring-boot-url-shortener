@@ -24,7 +24,7 @@ public class Permission {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, updatable = false, length = 255)
+  @Column(nullable = false, updatable = false, length = 60)
   private String permission;
 
 }

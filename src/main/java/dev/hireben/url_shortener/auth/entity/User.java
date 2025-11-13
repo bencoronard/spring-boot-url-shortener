@@ -34,7 +34,7 @@ public class User {
   @Column(nullable = false, updatable = false, length = 255)
   private String email;
 
-  @Column(nullable = false, updatable = false, length = 255)
+  @Column(nullable = false, updatable = false, length = 72)
   private String password;
 
   @Column(nullable = false, updatable = false)
