@@ -19,8 +19,8 @@ import dev.hireben.url_shortener.common.utility.jwt.JwtClients;
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtIssuer;
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtVerifier;
 
-@Configuration
-class UtilityConfig {
+@Configuration(proxyBeanMethods = false)
+final class UtilityConfig {
 
   @Bean
   JwtIssuer jwtIssuer(

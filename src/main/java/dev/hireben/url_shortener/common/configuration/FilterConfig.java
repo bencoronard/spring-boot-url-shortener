@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 
 import dev.hireben.url_shortener.common.filter.ApiAccessLogFilter;
 
-@Configuration
-class FilterConfig {
+@Configuration(proxyBeanMethods = false)
+final class FilterConfig {
 
   @Bean
   FilterRegistrationBean<ApiAccessLogFilter> apiAccessLogFilter() {

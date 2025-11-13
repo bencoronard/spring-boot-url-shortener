@@ -10,9 +10,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import dev.hireben.url_shortener.common.resolver.AuthorizationHeaderResolver;
 import lombok.RequiredArgsConstructor;
 
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @RequiredArgsConstructor
-class WebConfig implements WebMvcConfigurer {
+final class WebConfig implements WebMvcConfigurer {
 
   private final AuthorizationHeaderResolver authHeaderResolver;
 
