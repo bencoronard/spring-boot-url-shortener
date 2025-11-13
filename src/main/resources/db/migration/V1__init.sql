@@ -13,7 +13,8 @@ CREATE TABLE m_permissions (
 );
 
 CREATE TABLE t_url_mappings (
-  short_url_path VARCHAR(6) PRIMARY KEY,
+  short_url_path VARCHAR(6) PRIMARY KEY
+    CHECK (char_length(short_url_path) = 6),
   original_url VARCHAR(255) NOT NULL,
   created_by BIGINT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
