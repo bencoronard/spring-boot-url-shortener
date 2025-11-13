@@ -11,6 +11,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import dev.hireben.url_shortener.common.annotation.AuthorizationHeader;
 import dev.hireben.url_shortener.common.constant.MessageHeader;
+import dev.hireben.url_shortener.common.exception.TokenMalformedException;
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtVerifier;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,13 @@ public final class AuthorizationHeaderResolver implements HandlerMethodArgumentR
       throw new MissingRequestHeaderException(MessageHeader.AUTHORIZATION, parameter);
     }
 
-    return verifier.verifyToken(header.substring("Bearer ".length()));
+    Claims claims = verifier.verifyToken(header.substring("Bearer ".length()));
+
+    if (claims.getSubject() == null) {
+      throw new TokenMalformedException("Token is malformed");
+    }
+
+    return claims;
   }
 
 }
