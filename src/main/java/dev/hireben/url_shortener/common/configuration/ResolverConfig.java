@@ -10,7 +10,7 @@ import dev.hireben.url_shortener.common.utility.jwt.api.JwtVerifier;
 final class ResolverConfig {
 
   @Bean
-  AuthorizationHeaderResolver authorizationHeaderResolver(JwtVerifier verifier) {
+  private AuthorizationHeaderResolver authorizationHeaderResolver(JwtVerifier verifier) {
     return new AuthorizationHeaderResolver(verifier);
   }
 

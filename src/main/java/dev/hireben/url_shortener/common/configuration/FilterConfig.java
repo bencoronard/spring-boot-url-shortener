@@ -10,7 +10,7 @@ import dev.hireben.url_shortener.common.filter.ApiAccessLogFilter;
 final class FilterConfig {
 
   @Bean
-  FilterRegistrationBean<ApiAccessLogFilter> apiAccessLogFilter() {
+  private FilterRegistrationBean<ApiAccessLogFilter> apiAccessLogFilter() {
     FilterRegistrationBean<ApiAccessLogFilter> registration = new FilterRegistrationBean<>();
     registration.setFilter(new ApiAccessLogFilter());
     registration.setOrder(0);

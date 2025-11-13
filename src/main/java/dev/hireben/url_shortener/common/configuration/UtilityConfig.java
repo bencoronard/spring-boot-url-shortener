@@ -23,7 +23,7 @@ import dev.hireben.url_shortener.common.utility.jwt.api.JwtVerifier;
 final class UtilityConfig {
 
   @Bean
-  JwtIssuer jwtIssuer(
+  private JwtIssuer jwtIssuer(
       @Value("${spring.application.name}") String appName,
       @Value("${internal.jwt.sign-key-path}") String keyPath)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -38,7 +38,7 @@ final class UtilityConfig {
   // -----------------------------------------------------------------------------
 
   @Bean
-  JwtVerifier jwtVerifier(
+  private JwtVerifier jwtVerifier(
       @Value("${internal.jwt.verify-key-path}") String keyPath)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
 
@@ -52,7 +52,7 @@ final class UtilityConfig {
   // -----------------------------------------------------------------------------
 
   @Bean
-  PasswordEncoder passwordEncoder() {
+  private PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
   }
 
