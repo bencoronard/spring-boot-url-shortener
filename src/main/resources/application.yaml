@@ -20,17 +20,18 @@ spring:
     vault:
       uri: "${VAULT_URI}"
       token: "${URL_SHORTENER_VAULT_TOKEN}"
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
   data:
     web:
       pageable:
         max-page-size: "${URL_SHORTENER_PAGINATION_MAX_SIZE}"
+  datasource:
+    hikari:
+      pool-name: UrlShortenerHikariCP
+      maximum-pool-size: "${URL_SHORTENER_DB_CP_CAP}"
+      minimum-idle: "${URL_SHORTENER_DB_CP_IDLE_MIN}"
+      idle-timeout: "${URL_SHORTENER_DB_CP_IDLE_TIMEOUT}"
+      connection-timeout: "${URL_SHORTENER_DB_CP_CONN_TIMEOUT}"
+      max-lifetime: "${URL_SHORTENER_DB_CP_CONN_TTL}"
 
 management:
   endpoints:
@@ -80,11 +81,14 @@ spring:
   cloud:
     vault:
       enabled: false
-
-# logging:
-#   level:
-#     root: debug
-
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      
 management:
   otlp:
     metrics:
@@ -101,3 +105,7 @@ spring:
   config:
     activate:
       on-profile: test
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;
+    username: sa
+    password:
