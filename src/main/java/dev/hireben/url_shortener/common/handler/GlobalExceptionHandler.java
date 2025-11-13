@@ -30,6 +30,7 @@ import dev.hireben.url_shortener.common.exception.ApplicationException;
 import dev.hireben.url_shortener.common.exception.InsufficientPermissionException;
 import dev.hireben.url_shortener.common.exception.TokenMalformedException;
 import dev.hireben.url_shortener.url.exception.UrlMappingNotFoundException;
+import dev.hireben.url_shortener.url.exception.UrlShortenExceedMaxAttemptsException;
 import io.jsonwebtoken.JwtException;
 import io.micrometer.tracing.Tracer;
 import jakarta.validation.ConstraintViolationException;
@@ -46,7 +47,8 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
       InsufficientPermissionException.class, HttpStatus.FORBIDDEN,
       InvalidCredentialsException.class, HttpStatus.UNAUTHORIZED,
       UserAlreadyExistsException.class, HttpStatus.CONFLICT,
-      UrlMappingNotFoundException.class, HttpStatus.NOT_FOUND);
+      UrlMappingNotFoundException.class, HttpStatus.NOT_FOUND,
+      UrlShortenExceedMaxAttemptsException.class, HttpStatus.INTERNAL_SERVER_ERROR);
 
   // =============================================================================
 

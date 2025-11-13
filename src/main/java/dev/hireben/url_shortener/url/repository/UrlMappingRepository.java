@@ -8,8 +8,12 @@ import dev.hireben.url_shortener.url.entity.UrlMapping;
 
 public interface UrlMappingRepository extends JpaRepository<UrlMapping, String> {
 
-  Slice<UrlMapping> findByCreatedById(Pageable pageable, Long createdById);
+  Slice<String> findAllShortUrlPathByCreatedById(Pageable pageable, Long createdById);
 
-  UrlMapping findByShortUrlPathAndCreatedById(String shortUrlPath, Long createdById);
+  String findOriginalUrlByShortUrlPathAndCreatedById(String shortUrlPath, Long createdById);
+
+  String findShortUrlPathByOriginalUrlAndCreatedById(String originalUrl, Long createdById);
+
+  void deleteByShortUrlPathAndCreatedById(String shortUrlPath, Long createdById);
 
 }

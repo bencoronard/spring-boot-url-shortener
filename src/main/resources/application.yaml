@@ -66,6 +66,8 @@ internal:
     dummy-psw-hash: "${URL_SHORTENER_BCRYPT_DUMMY_HASH}"
   host:
     external-url: "${URL_SHORTENER_EXTERNAL_URL}"
+  url:
+    id-gen-max-attempts: "${URL_SHORTENER_ID_GEN_MAX_ATTEMPTS}"
 
 ---
 # Environment: LOCAL
