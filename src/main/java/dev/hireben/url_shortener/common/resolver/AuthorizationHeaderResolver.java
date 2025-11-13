@@ -45,8 +45,9 @@ public final class AuthorizationHeaderResolver implements HandlerMethodArgumentR
     }
 
     Claims claims = verifier.verifyToken(header.substring("Bearer ".length()));
+    String subject = claims.getSubject();
 
-    if (claims.getSubject() == null) {
+    if (subject == null || subject.isBlank() || !subject.matches("^\\d+$")) {
       throw new TokenMalformedException("Token is malformed");
     }
 
