@@ -2,6 +2,6 @@ source:
   language: java
   version: 25
 test:
-  command: './gradlew test --quiet'
-  container: 'project/open-jdk-25:latest'
+  command: 'gradle test --quiet'
+  container: 'devsecops/tools/gradle:9.1.0-jdk-25'
   reports: 'build/reports/tests/test'
