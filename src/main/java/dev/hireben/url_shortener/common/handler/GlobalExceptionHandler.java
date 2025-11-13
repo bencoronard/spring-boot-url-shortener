@@ -165,7 +165,8 @@ final class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     HttpStatus status = HttpStatus.CONFLICT;
 
-    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, "Database update fail. Try again later.");
+    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status,
+        "Database update fail. Retry the operation again.");
 
     return createResponseEntity(problemDetail, HttpHeaders.EMPTY, status, request);
   }
