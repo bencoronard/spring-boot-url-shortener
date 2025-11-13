@@ -1,4 +1,4 @@
-.PHONY: run test
+.PHONY: run test clean build
 
 ENV_FILE := ./.env
 
@@ -19,3 +19,9 @@ run:
 test:
 	$(LOAD_ENV) \
 	./gradlew test
+
+clean:
+	./gradlew clean
+
+build:
+	./gradlew build -x test
