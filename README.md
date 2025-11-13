@@ -7,7 +7,7 @@ A secure, production-ready API for shortening HTTP URLs using JWT-based authenti
   - **Extensible**: Designed for granular access control and easy feature expansion.
   - **Performant**: Minimizes operations and network overhead.
   - **Pragmatic**: Leverages framework mechanisms over custom code.
-  - **Security-focused**: Follows security practices in both application logic and secret management.
+  - **Security-focused**: Follows security practices in both application logic and secrets management.
 
 ## Setup
 
@@ -38,7 +38,8 @@ The application uses an **H2 in-memory database** (for `test` and `local` profil
 2. Start the application with:
    ```bash
    docker compose up -d
-  
+   ```
+
 ### Notes
 
 - For full system integration, use profiles other than `test` or `local` (e.g., `APP_ENVIRONMENT=sit`).  
@@ -46,3 +47,41 @@ The application uses an **H2 in-memory database** (for `test` and `local` profil
 - **HashiCorp Vault** must contain the required key-value secrets (see `application.yml` and  
   `src/main/java/dev/hireben/url_shortener/common/configuration/DataSourceConfig.java`) for the application to start successfully.
 
+## Example API Usage
+
+Assuming the application is running on `localhost:8080`.
+
+### 1. Register
+```bash
+curl -X POST http://localhost:8080/api/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"P@ssw0rd"}'
+```
+### 2. Login
+```bash
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user@example.com","password":"P@ssw0rd"}'
+```
+### 3. Shorten a URL
+```bash
+curl -X POST http://localhost:8080/api/shorten \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -d '{"original_url":"https://example.com/some/very/long/link"}'
+```
+### 4. Delete a Short URL
+```bash
+curl -X DELETE http://localhost:8080/api/urls/abc123 \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+### 5. List Recently Created Short URLs (last 20)
+```bash
+curl http://localhost:8080/api/urls \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+### 6. Redirect to Original URL
+```bash
+curl -L http://localhost:8080/r/abc123 \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+```
