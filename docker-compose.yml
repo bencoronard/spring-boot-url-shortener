@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: docker.io/library/postgres:alpine
+    networks:
+      - localnet
+    ports:
+      - '5432:5432'
+      # ...
+  vault:
+    image: docker.io/hashicorp/vault:latest
+    networks:
+      - localnet
+    ports:
+      - '8200:8200'
+      # ...
+  zipkin:
+    image: docker.io/openzipkin/zipkin:latest
+    networks:
+      - localnet
+    ports:
+      - '9411:9411'
+  otel:
+    image: docker.io/otel/opentelemetry-collector-contrib:latest
+    networks:
+      - localnet
+    ports:
+      - '4318:4318'
+      # ...
+
+  url-shortener:
+    image: localhost/url-shortener:local
+    networks:
+      - localnet
+    ports:
+      - '8080:8080'
+      # ...
+    environment:
+      APP_ENVIRONMENT: sit
+      APP_LISTEN_PORT: 8080
+      VAULT_URI: http://vault:8200
+      OTLP_METRICS_ENDPOINT: http://otel:4318/v1/metrics
+      ZIPKIN_TRACES_ENDPOINT: http://zipkin:9411/api/v2/spans
+      METRICS_SAMPLING_FREQ_IN_MIN: 1m
+      TRACES_SAMPLING_PROBABILITY: 1.0
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      URL_SHORTENER_VAULT_TOKEN: hvs.gMaRKCO9sBfTsLOnhxIBRO1S
+      URL_SHORTENER_PRIVATE_KEY_PATH: /mnt/keys/rsa-private-pkcs8.pem
+      URL_SHORTENER_PUBLIC_KEY_PATH: /mnt/keys/rsa-public-x509.pem
+      URL_SHORTENER_TOKEN_TTL_SEC: 300
+      URL_SHORTENER_BCRYPT_DUMMY_HASH: $2a$12$u/M/.ENM21aTNJe8OpG8m.El//zF/aNJ5Xq7tMz9GpRaAb1WxaFNW
+      URL_SHORTENER_EXTERNAL_URL: http://localhost:8080
+      URL_SHORTENER_PAGINATION_MAX_SIZE: 50
+      URL_SHORTENER_ID_GEN_MAX_ATTEMPTS: 5
+      URL_SHORTENER_DB_CP_CAP: 5
+      URL_SHORTENER_DB_CP_IDLE_MIN: 1
+      URL_SHORTENER_DB_CP_IDLE_TIMEOUT: 600000
+      URL_SHORTENER_DB_CP_CONN_TIMEOUT: 30000
+      URL_SHORTENER_DB_CP_CONN_TTL: 2000000
+
+networks:
+  localnet:
