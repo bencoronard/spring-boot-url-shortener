@@ -20,7 +20,7 @@ spring:
     vault:
       uri: "${VAULT_URI}"
       token: "${URL_SHORTENER_VAULT_TOKEN}"
-      fail-fast: true
+      fail-fast: false
       kv:
         profiles: "${spring.profiles.active}"
         application-name: "${spring.application.name}"
