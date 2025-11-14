@@ -1,10 +1,10 @@
 package dev.hireben.url_shortener.url.service;
 
 import java.time.Instant;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,9 +45,9 @@ class UrlMappingServiceImpl implements UrlMappingService {
 
     Long userId = Long.parseLong(authClaims.getSubject());
 
-    String existingShortUrlPath = urlMappingRepository.findShortUrlPathByOriginalUrlAndCreatedById(originalUrl, userId);
-    if (existingShortUrlPath != null) {
-      return String.format(shortUrlFormat, hostExternalUrl, existingShortUrlPath);
+    UrlMapping existingUrlMapping = urlMappingRepository.findByOriginalUrlAndCreatedById(originalUrl, userId);
+    if (existingUrlMapping != null) {
+      return String.format(shortUrlFormat, hostExternalUrl, existingUrlMapping.getShortUrlPath());
     }
 
     for (int i = 0; i < idGenMaxAttempt; i++) {
@@ -77,15 +77,15 @@ class UrlMappingServiceImpl implements UrlMappingService {
   @Transactional(readOnly = true)
   public String retrieveOriginalUrl(String shortUrlPath, Claims authClaims) {
 
-    String originalUrl = urlMappingRepository.findOriginalUrlByShortUrlPathAndCreatedById(shortUrlPath,
+    UrlMapping existingUrlMapping = urlMappingRepository.findByShortUrlPathAndCreatedById(shortUrlPath,
         Long.parseLong(authClaims.getSubject()));
 
-    if (originalUrl == null) {
+    if (existingUrlMapping == null) {
       throw new UrlMappingNotFoundException(
           String.format("No URL mapping found for " + shortUrlFormat, hostExternalUrl, shortUrlPath));
     }
 
-    return originalUrl;
+    return existingUrlMapping.getOriginalUrl();
   }
 
   // -----------------------------------------------------------------------------
@@ -99,7 +99,16 @@ class UrlMappingServiceImpl implements UrlMappingService {
       throw new InsufficientPermissionException("Not allowed to list short URLs");
     }
 
-    return urlMappingRepository.findAllShortUrlPathByCreatedById(pageable, Long.parseLong(authClaims.getSubject()));
+    Slice<UrlMapping> urlMappingSlice = urlMappingRepository.findAllByCreatedById(pageable,
+        Long.parseLong(authClaims.getSubject()));
+
+    Slice<String> shortUrlSlice = new SliceImpl<>(
+        urlMappingSlice.getContent().stream().map(
+            mapping -> String.format(shortUrlFormat, hostExternalUrl, mapping.getShortUrlPath())).toList(),
+        urlMappingSlice.getPageable(),
+        urlMappingSlice.hasNext());
+
+    return shortUrlSlice;
   }
 
   // -----------------------------------------------------------------------------
