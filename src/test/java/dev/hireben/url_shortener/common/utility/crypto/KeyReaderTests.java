@@ -32,7 +32,7 @@ final class KeyReaderTests {
     rsaPublicKeyX509 = new String(publicKeyFile);
   }
 
-  // -----------------------------------------------------------------------------
+  // =============================================================================
 
   @Test
   void readValidRsaKeyPkcs8_ShouldReturnPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
