@@ -13,7 +13,7 @@ import org.junit.jupiter.api.TestInstance;
 final class UrlSafeIdGeneratorTests {
 
   @Test
-  void testGenerateUrlSafeStringWithInvalidArg() {
+  void nonPositiveArgument_ShouldThrowException() {
 
     Exception exception = assertThrows(IllegalArgumentException.class,
         () -> UrlSafeIdGenerator.generateUrlSafeString(0));
@@ -24,7 +24,7 @@ final class UrlSafeIdGeneratorTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testGenerateUrlSafeStringWithValidArg() {
+  void generatedId_ShouldRemainUnchangedWhenEncoded() {
     String actual = UrlSafeIdGenerator.generateUrlSafeString(6);
     String actualEncoded = URLEncoder.encode(actual, StandardCharsets.UTF_8);
     assertEquals(actualEncoded, actual);

@@ -35,7 +35,7 @@ final class KeyReaderTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testReadRsaPrivateKeyPkcs8() throws NoSuchAlgorithmException, InvalidKeySpecException {
+  void readValidRsaKeyPkcs8_ShouldReturnPrivateKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
     PrivateKey key = KeyReader.readRsaPrivateKeyPkcs8(rsaPrivateKeyPkcs8);
     assertNotNull(key);
     assertNotNull(key.getEncoded());
@@ -46,7 +46,7 @@ final class KeyReaderTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testReadRsaPublicKeyX509() throws NoSuchAlgorithmException,
+  void readRsaPublicKeyX509_ShouldReturnPublicKey() throws NoSuchAlgorithmException,
       InvalidKeySpecException {
     PublicKey key = KeyReader.readRsaPublicKeyX509(rsaPublicKeyX509);
     assertNotNull(key);
@@ -58,7 +58,7 @@ final class KeyReaderTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testPublicKeyMatchesPrivateKey() throws NoSuchAlgorithmException,
+  void readPublicKey_ShouldEqualDerivedPublicKeyFromPrivateKey() throws NoSuchAlgorithmException,
       InvalidKeySpecException {
     PrivateKey privateKey = KeyReader.readRsaPrivateKeyPkcs8(rsaPrivateKeyPkcs8);
     PublicKey publicKey = KeyReader.readRsaPublicKeyX509(rsaPublicKeyX509);

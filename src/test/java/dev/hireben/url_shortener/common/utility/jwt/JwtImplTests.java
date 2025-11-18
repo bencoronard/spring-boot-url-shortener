@@ -8,8 +8,6 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import javax.crypto.SecretKey;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -23,21 +21,12 @@ import io.jsonwebtoken.Jwts;
 final class JwtImplTests {
 
   private final String issuerName = getClass().getSimpleName();
-  private final SecretKey symmetricKey = Jwts.SIG.HS256.key().build();
   private final KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
 
   // =============================================================================
 
   @Test
-  void testJwtVerifierConstructorWithNullSymmetricKey() {
-    Exception exception = assertThrows(NullPointerException.class, () -> new JwtVerifierImpl((SecretKey) null));
-    assertEquals("Symmetric key must not be null", exception.getMessage());
-  }
-
-  // -----------------------------------------------------------------------------
-
-  @Test
-  void testJwtVerifierConstructorWithNullPublicKey() {
+  void constructVerifierWithNullPublicKey_ShouldThrowException() {
     Exception exception = assertThrows(NullPointerException.class, () -> new JwtVerifierImpl((PublicKey) null));
     assertEquals("Public key must not be null", exception.getMessage());
   }
@@ -45,16 +34,7 @@ final class JwtImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testJwtIssuerConstructorWithNullSymmetricKey() {
-    Exception exception = assertThrows(NullPointerException.class,
-        () -> new JwtIssuerImpl(issuerName, (SecretKey) null));
-    assertEquals("Symmetric key must not be null", exception.getMessage());
-  }
-
-  // -----------------------------------------------------------------------------
-
-  @Test
-  void testJwtIssuerConstructorWithNullPrivateKey() {
+  void constructIssuerWithNullPrivateKey_ShouldThrowException() {
     Exception exception = assertThrows(NullPointerException.class,
         () -> new JwtIssuerImpl(issuerName, (PrivateKey) null));
     assertEquals("Private key must not be null", exception.getMessage());
@@ -63,39 +43,7 @@ final class JwtImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void testIssueAndParseTokenWithoutKey() {
-    JwtIssuer issuer = new JwtIssuerImpl(issuerName);
-    JwtVerifier verifier = new JwtVerifierImpl();
-
-    String token = issuer.issueToken(null, null, null, null, null);
-    Assertions.assertThat(token).isNotBlank();
-
-    Claims claims = verifier.verifyToken(token);
-    assertNotNull(claims);
-    assertNotNull(claims.getId());
-    assertNotNull(claims.getIssuedAt());
-  }
-
-  // -----------------------------------------------------------------------------
-
-  @Test
-  void testIssueAndParseTokenWithSymmetricKey() {
-    JwtIssuer issuer = new JwtIssuerImpl(issuerName, symmetricKey);
-    JwtVerifier verifier = new JwtVerifierImpl(symmetricKey);
-
-    String token = issuer.issueToken(null, null, null, null, null);
-    Assertions.assertThat(token).isNotBlank();
-
-    Claims claims = verifier.verifyToken(token);
-    assertNotNull(claims);
-    assertNotNull(claims.getId());
-    assertNotNull(claims.getIssuedAt());
-  }
-
-  // -----------------------------------------------------------------------------
-
-  @Test
-  void testIssueAndParseTokenWithAsymmetricKeys() {
+  void issueJwtWithPrivateKey_ShouldBeVerifiableByPublicKey() {
     JwtIssuer issuer = new JwtIssuerImpl(issuerName, keyPair.getPrivate());
     JwtVerifier verifier = new JwtVerifierImpl(keyPair.getPublic());
 

@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import javax.crypto.SecretKey;
-
 import dev.hireben.url_shortener.common.utility.jwt.api.JwtIssuer;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
@@ -21,19 +19,6 @@ final class JwtIssuerImpl implements JwtIssuer {
   private final Supplier<JwtBuilder> builder;
 
   // =============================================================================
-
-  JwtIssuerImpl(String issuer) {
-    builder = () -> Jwts.builder().issuer(issuer);
-  }
-
-  // -----------------------------------------------------------------------------
-
-  JwtIssuerImpl(String issuer, SecretKey key) {
-    Objects.requireNonNull(key, "Symmetric key must not be null");
-    builder = () -> Jwts.builder().signWith(key).issuer(issuer);
-  }
-
-  // -----------------------------------------------------------------------------
 
   JwtIssuerImpl(String issuer, PrivateKey key) {
     Objects.requireNonNull(key, "Private key must not be null");
