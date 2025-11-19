@@ -17,6 +17,7 @@ final class ShortenUrlRequestBodyTests {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   // =============================================================================
+
   @Test
   void validUrl_ShouldPassValidation() {
     ShortenUrlRequestBody body = new ShortenUrlRequestBody("https://example.com");
