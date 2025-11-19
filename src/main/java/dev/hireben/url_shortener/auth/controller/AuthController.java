@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequiredArgsConstructor
 final class AuthController {
 
-  final AuthService authService;
+  private final AuthService authService;
 
   // =============================================================================
 

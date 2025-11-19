@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 final class UrlMappingController {
 
-  final UrlMappingService urlMappingService;
+  private final UrlMappingService urlMappingService;
 
   // =============================================================================
 

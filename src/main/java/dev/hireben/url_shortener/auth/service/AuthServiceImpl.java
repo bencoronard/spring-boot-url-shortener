@@ -21,16 +21,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 final class AuthServiceImpl implements AuthService {
 
-  final PasswordEncoder passwordEncoder;
-  final JwtIssuer jwtIssuer;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtIssuer jwtIssuer;
 
-  final UserRepository userRepository;
-  final PermissionRepository permissionRepository;
+  private final UserRepository userRepository;
+  private final PermissionRepository permissionRepository;
 
   @Value("${internal.jwt.token-ttl-in-sec}")
-  Integer tokenTtlInSec;
+  private Integer tokenTtlInSec;
   @Value("${internal.auth.dummy-psw-hash}")
-  String dummyPasswordHash;
+  private String dummyPasswordHash;
 
   // =============================================================================
 

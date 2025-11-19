@@ -22,15 +22,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 class UrlMappingServiceImpl implements UrlMappingService {
 
-  final UrlMappingRepository urlMappingRepository;
-  final UserRepository userRepository;
+  private final UrlMappingRepository urlMappingRepository;
+  private final UserRepository userRepository;
 
-  static final String shortUrlFormat = "%s/r/%s";
+  private static final String shortUrlFormat = "%s/r/%s";
 
   @Value("${internal.host.external-url}")
-  String hostExternalUrl;
+  private String hostExternalUrl;
   @Value("${internal.url.id-gen-max-attempts}")
-  Integer idGenMaxAttempt;
+  private Integer idGenMaxAttempt;
 
   // =============================================================================
 
