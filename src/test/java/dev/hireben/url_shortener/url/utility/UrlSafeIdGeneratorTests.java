@@ -7,9 +7,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class UrlSafeIdGeneratorTests {
 
   @Test

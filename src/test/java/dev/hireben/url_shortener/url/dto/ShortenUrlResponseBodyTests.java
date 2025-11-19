@@ -2,11 +2,8 @@ package dev.hireben.url_shortener.url.dto;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class ShortenUrlResponseBodyTests {
 
   private static final ObjectMapper objectMapper = new ObjectMapper();

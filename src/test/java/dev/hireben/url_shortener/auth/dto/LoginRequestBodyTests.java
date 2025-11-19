@@ -4,15 +4,12 @@ import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class LoginRequestBodyTests {
 
   private static final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();

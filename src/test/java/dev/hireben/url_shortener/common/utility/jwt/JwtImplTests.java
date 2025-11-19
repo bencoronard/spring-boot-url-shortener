@@ -20,8 +20,8 @@ import io.jsonwebtoken.Jwts;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 final class JwtImplTests {
 
-  private final String issuerName = getClass().getSimpleName();
-  private final KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
+  private static final String issuerName = "dev";
+  private static final KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
 
   // =============================================================================
 

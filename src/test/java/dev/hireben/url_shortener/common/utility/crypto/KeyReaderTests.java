@@ -24,7 +24,7 @@ final class KeyReaderTests {
 
   // =============================================================================
 
-  KeyReaderTests() throws IOException {
+  private KeyReaderTests() throws IOException {
     byte[] privateKeyFile = getClass().getResourceAsStream("/rsa-private-pkcs8.pem").readAllBytes();
     byte[] publicKeyFile = getClass().getResourceAsStream("/rsa-public-x509.pem").readAllBytes();
 
