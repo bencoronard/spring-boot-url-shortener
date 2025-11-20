@@ -48,15 +48,19 @@ final class UrlMappingServiceImplTests {
   // =============================================================================\
 
   private static final String hostExternalUrl = "http://localhost:8080";
-  private static final String mockOriginalUrl = "https://localhost.svc.cluster.local";
   private static final String redirectBaseUrl = hostExternalUrl + "/r/";
+  private static final String mockOriginalUrl = "https://localhost.svc.cluster.local";
+  private static final String mockShortUrlPath1 = "aaa111";
+  private static final String mockShortUrlPath2 = "bbb222";
+  private static final Long mockUserId = 1L;
+  private static final String mockUserIdString = "1";
 
   // =============================================================================
 
   @BeforeEach
   void setup() {
     ReflectionTestUtils.setField(urlMappingService, "hostExternalUrl", hostExternalUrl);
-    ReflectionTestUtils.setField(urlMappingService, "idGenMaxAttempt", 3);
+    ReflectionTestUtils.setField(urlMappingService, "idGenMaxAttempt", 2);
   }
 
   // =============================================================================
@@ -76,19 +80,17 @@ final class UrlMappingServiceImplTests {
   void createUrlMapping_whenOriginalUrlExists_shouldReturnExistingShortUrl() {
     Claims claims = mock(Claims.class);
     when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
-    when(claims.getSubject()).thenReturn("1");
-
-    String path = "abc123";
+    when(claims.getSubject()).thenReturn(mockUserIdString);
 
     UrlMapping exising = UrlMapping.builder()
-        .shortUrlPath(path)
+        .shortUrlPath(mockShortUrlPath1)
         .build();
 
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(exising);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, mockUserId)).thenReturn(exising);
 
     String result = urlMappingService.createUrlMapping(mockOriginalUrl, claims);
 
-    assertEquals(redirectBaseUrl + path, result);
+    assertEquals(redirectBaseUrl + mockShortUrlPath1, result);
   }
 
   // -----------------------------------------------------------------------------
@@ -97,21 +99,19 @@ final class UrlMappingServiceImplTests {
   void createUrlMapping_whenOriginalUrlDoesNotExist_shouldCreateNewShortUrl() {
     Claims claims = mock(Claims.class);
     when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
-    when(claims.getSubject()).thenReturn("1");
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(null);
+    when(claims.getSubject()).thenReturn(mockUserIdString);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, mockUserId)).thenReturn(null);
 
     try (MockedStatic<UrlSafeIdGenerator> urlSafeIdGenerator = mockStatic(UrlSafeIdGenerator.class)) {
 
-      String path = "abc123";
+      urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6)).thenReturn(mockShortUrlPath1);
 
-      urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6)).thenReturn(path);
-
-      when(urlMappingRepository.existsById(path)).thenReturn(false);
-      when(userRepository.getReferenceById(1L)).thenReturn(User.builder().build());
+      when(urlMappingRepository.existsById(mockShortUrlPath1)).thenReturn(false);
+      when(userRepository.getReferenceById(mockUserId)).thenReturn(User.builder().build());
 
       String result = urlMappingService.createUrlMapping(mockOriginalUrl, claims);
 
-      assertEquals(redirectBaseUrl + path, result);
+      assertEquals(redirectBaseUrl + mockShortUrlPath1, result);
       verify(urlMappingRepository).save(any(UrlMapping.class));
     }
   }
@@ -122,12 +122,12 @@ final class UrlMappingServiceImplTests {
   void createUrlMapping_afterMaxFailedAttempts_shouldThrowException() {
     Claims claims = mock(Claims.class);
     when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
-    when(claims.getSubject()).thenReturn("1");
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(null);
+    when(claims.getSubject()).thenReturn(mockUserIdString);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, mockUserId)).thenReturn(null);
 
     try (MockedStatic<UrlSafeIdGenerator> urlSafeIdGenerator = mockStatic(UrlSafeIdGenerator.class)) {
       urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6))
-          .thenReturn("aaa111", "bbb222", "ccc333");
+          .thenReturn(mockShortUrlPath1, mockShortUrlPath2);
 
       when(urlMappingRepository.existsById(any())).thenReturn(true);
 
@@ -141,13 +141,12 @@ final class UrlMappingServiceImplTests {
   @Test
   void retrieveOriginalUrl_whenNotFound_shouldThrowException() {
     Claims claims = mock(Claims.class);
-    when(claims.getSubject()).thenReturn("1");
+    when(claims.getSubject()).thenReturn(mockUserIdString);
 
-    String path = "abc123";
+    when(urlMappingRepository.findByShortUrlPathAndCreatedById(mockShortUrlPath1, mockUserId)).thenReturn(null);
 
-    when(urlMappingRepository.findByShortUrlPathAndCreatedById(path, 1L)).thenReturn(null);
-
-    assertThrows(UrlMappingNotFoundException.class, () -> urlMappingService.retrieveOriginalUrl(path, claims));
+    assertThrows(UrlMappingNotFoundException.class,
+        () -> urlMappingService.retrieveOriginalUrl(mockShortUrlPath1, claims));
   }
 
   // -----------------------------------------------------------------------------
@@ -155,17 +154,15 @@ final class UrlMappingServiceImplTests {
   @Test
   void retrieveOriginalUrl_shouldReturnOriginalUrl() {
     Claims claims = mock(Claims.class);
-    when(claims.getSubject()).thenReturn("1");
+    when(claims.getSubject()).thenReturn(mockUserIdString);
 
     UrlMapping urlMapping = UrlMapping.builder()
         .originalUrl(mockOriginalUrl)
         .build();
 
-    String path = "abc123";
+    when(urlMappingRepository.findByShortUrlPathAndCreatedById(mockShortUrlPath1, mockUserId)).thenReturn(urlMapping);
 
-    when(urlMappingRepository.findByShortUrlPathAndCreatedById(path, 1L)).thenReturn(urlMapping);
-
-    String result = urlMappingService.retrieveOriginalUrl(path, claims);
+    String result = urlMappingService.retrieveOriginalUrl(mockShortUrlPath1, claims);
 
     assertEquals(mockOriginalUrl, result);
   }
@@ -187,22 +184,20 @@ final class UrlMappingServiceImplTests {
   void listShortUrls_shouldReturnShortUrlSlice() {
     Claims claims = mock(Claims.class);
     when(claims.get(UrlPermission.LIST_URL_MAPPING, Integer.class)).thenReturn(1);
-    when(claims.getSubject()).thenReturn("1");
-
-    String path1 = "aaa111";
-    String path2 = "bbb222";
+    when(claims.getSubject()).thenReturn(mockUserIdString);
 
     List<UrlMapping> list = List.of(
-        UrlMapping.builder().shortUrlPath(path1).build(),
-        UrlMapping.builder().shortUrlPath(path2).build());
+        UrlMapping.builder().shortUrlPath(mockShortUrlPath1).build(),
+        UrlMapping.builder().shortUrlPath(mockShortUrlPath2).build());
 
     Slice<UrlMapping> slice = new SliceImpl<>(list);
 
-    when(urlMappingRepository.findAllByCreatedById(any(), eq(1L))).thenReturn(slice);
+    when(urlMappingRepository.findAllByCreatedById(any(), eq(mockUserId))).thenReturn(slice);
 
     Slice<String> result = urlMappingService.listShortUrls(PageRequest.of(0, 10), claims);
 
-    assertEquals(List.of(redirectBaseUrl + path1, redirectBaseUrl + path2), result.getContent());
+    assertEquals(List.of(redirectBaseUrl + mockShortUrlPath1, redirectBaseUrl + mockShortUrlPath2),
+        result.getContent());
   }
 
   // -----------------------------------------------------------------------------
@@ -222,13 +217,11 @@ final class UrlMappingServiceImplTests {
   void removeUrlMapping_shouldCallRepositoryDelete() {
     Claims claims = mock(Claims.class);
     when(claims.get(UrlPermission.DELETE_URL_MAPPING, Integer.class)).thenReturn(1);
-    when(claims.getSubject()).thenReturn("1");
+    when(claims.getSubject()).thenReturn(mockUserIdString);
 
-    String path = "abc123";
+    urlMappingService.removeUrlMapping(mockShortUrlPath1, claims);
 
-    urlMappingService.removeUrlMapping(path, claims);
-
-    verify(urlMappingRepository).deleteByShortUrlPathAndCreatedById(path, 1L);
+    verify(urlMappingRepository).deleteByShortUrlPathAndCreatedById(mockShortUrlPath1, mockUserId);
   }
 
 }
