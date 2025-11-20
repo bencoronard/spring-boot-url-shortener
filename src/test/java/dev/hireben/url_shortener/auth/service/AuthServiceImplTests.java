@@ -55,7 +55,7 @@ final class AuthServiceImplTests {
   // =============================================================================
 
   @Test
-  void registerWithExistingEmail_ShouldThrowException() {
+  void register_withExistingEmail_shouldThrowException() {
     when(userRepository.existsByEmail("user@hireben.dev")).thenReturn(true);
 
     assertThrows(UserAlreadyExistsException.class, () -> authService.register("USER@hireben.dev", "P@ssw0rd"));
@@ -64,7 +64,7 @@ final class AuthServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void registerWithNewEmail_ShouldSaveUser() {
+  void register_withNewEmail_shouldCreateNewUser() {
     when(userRepository.existsByEmail("user@hireben.dev")).thenReturn(false);
     when(passwordEncoder.encode("P@ssw0rd")).thenReturn("H@shedP@ssw0rd");
 
@@ -77,7 +77,7 @@ final class AuthServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void loginWithNonExistentEmail_ShouldThrowException() {
+  void login_withNonExistentEmail_shouldThrowException() {
     when(userRepository.findByEmail("user@hireben.dev")).thenReturn(null);
     when(passwordEncoder.matches("P@ssw0rd", "dummyH@sh")).thenReturn(false);
 
@@ -87,7 +87,7 @@ final class AuthServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void loginWithIncorrectPassword_ShouldThrowException() {
+  void login_withIncorrectPassword_shouldThrowException() {
     User user = User.builder().email("user@hireben.dev").password("H@shedP@ssw0rd").build();
 
     when(userRepository.findByEmail("user@hireben.dev")).thenReturn(user);
@@ -99,7 +99,7 @@ final class AuthServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void loginWithValidCredentials_ShouldReturnToken() {
+  void login_withValidCredentials_shouldReturnToken() {
     User user = User.builder()
         .id(1L)
         .email("user@hireben.dev")
@@ -123,7 +123,7 @@ final class AuthServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void loginWithNonExistentEmail_ShouldPerformHashingAndThrowException() {
+  void login_withNonExistentEmail_shouldPerformHashingAndThrowException() {
     when(userRepository.findByEmail("user@hireben.dev")).thenReturn(null);
     when(passwordEncoder.matches("P@ssw0rd", "dummyH@sh")).thenReturn(false);
 

@@ -30,6 +30,7 @@ import dev.hireben.url_shortener.url.entity.UrlMapping;
 import dev.hireben.url_shortener.url.exception.UrlMappingNotFoundException;
 import dev.hireben.url_shortener.url.exception.UrlShortenExceedMaxAttemptsException;
 import dev.hireben.url_shortener.url.repository.UrlMappingRepository;
+import dev.hireben.url_shortener.url.utility.UrlPermission;
 import dev.hireben.url_shortener.url.utility.UrlSafeIdGenerator;
 import io.jsonwebtoken.Claims;
 
@@ -44,61 +45,73 @@ final class UrlMappingServiceImplTests {
   @InjectMocks
   private UrlMappingServiceImpl urlMappingService;
 
+  // =============================================================================\
+
+  private static final String hostExternalUrl = "http://localhost:8080";
+  private static final String mockOriginalUrl = "https://localhost.svc.cluster.local";
+  private static final String redirectBaseUrl = hostExternalUrl + "/r/";
+
   // =============================================================================
 
   @BeforeEach
   void setup() {
-    ReflectionTestUtils.setField(urlMappingService, "hostExternalUrl", "http://localhost");
+    ReflectionTestUtils.setField(urlMappingService, "hostExternalUrl", hostExternalUrl);
     ReflectionTestUtils.setField(urlMappingService, "idGenMaxAttempt", 3);
   }
 
   // =============================================================================
 
   @Test
-  void createUrlMappingWithNoPermission_ShouldThrowException() {
+  void createUrlMapping_withoutPermission_shouldThrowException() {
     Claims claims = mock(Claims.class);
-    when(claims.get("CREATE_URL_MAPPING", Integer.class)).thenReturn(null);
+    when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(null);
 
-    assertThrows(InsufficientPermissionException.class, () -> urlMappingService.createUrlMapping("url", claims));
+    assertThrows(InsufficientPermissionException.class,
+        () -> urlMappingService.createUrlMapping(mockOriginalUrl, claims));
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void createUrlMapping_ShouldReturnExistingShortUrl_whenOriginalUrlExists() {
+  void createUrlMapping_whenOriginalUrlExists_shouldReturnExistingShortUrl() {
     Claims claims = mock(Claims.class);
-    when(claims.get("CREATE_URL_MAPPING", Integer.class)).thenReturn(1);
+    when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
     when(claims.getSubject()).thenReturn("1");
+
+    String path = "abc123";
 
     UrlMapping exising = UrlMapping.builder()
-        .shortUrlPath("abc123")
+        .shortUrlPath(path)
         .build();
 
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById("http://localhost.com", 1L)).thenReturn(exising);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(exising);
 
-    String result = urlMappingService.createUrlMapping("http://localhost.com", claims);
+    String result = urlMappingService.createUrlMapping(mockOriginalUrl, claims);
 
-    assertEquals("http://localhost/r/abc123", result);
+    assertEquals(redirectBaseUrl + path, result);
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void createUrlMapping_ShouldGenerateShortUrl() {
+  void createUrlMapping_whenOriginalUrlDoesNotExist_shouldCreateNewShortUrl() {
     Claims claims = mock(Claims.class);
-    when(claims.get("CREATE_URL_MAPPING", Integer.class)).thenReturn(1);
+    when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
     when(claims.getSubject()).thenReturn("1");
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById("http://localhost.com", 1L)).thenReturn(null);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(null);
 
     try (MockedStatic<UrlSafeIdGenerator> urlSafeIdGenerator = mockStatic(UrlSafeIdGenerator.class)) {
-      urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6)).thenReturn("abc123");
 
-      when(urlMappingRepository.existsById("abc123")).thenReturn(false);
-      when(userRepository.getReferenceById(1L)).thenReturn(User.builder().id(1L).build());
+      String path = "abc123";
 
-      String result = urlMappingService.createUrlMapping("http://localhost.com", claims);
+      urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6)).thenReturn(path);
 
-      assertEquals("http://localhost/r/abc123", result);
+      when(urlMappingRepository.existsById(path)).thenReturn(false);
+      when(userRepository.getReferenceById(1L)).thenReturn(User.builder().build());
+
+      String result = urlMappingService.createUrlMapping(mockOriginalUrl, claims);
+
+      assertEquals(redirectBaseUrl + path, result);
       verify(urlMappingRepository).save(any(UrlMapping.class));
     }
   }
@@ -106,58 +119,63 @@ final class UrlMappingServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void createUrlMapping_ShouldFail_afterMaxAttempts() {
+  void createUrlMapping_afterMaxFailedAttempts_shouldThrowException() {
     Claims claims = mock(Claims.class);
-    when(claims.get("CREATE_URL_MAPPING", Integer.class)).thenReturn(1);
+    when(claims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class)).thenReturn(1);
     when(claims.getSubject()).thenReturn("1");
-    when(urlMappingRepository.findByOriginalUrlAndCreatedById("http://localhost.com", 1L)).thenReturn(null);
+    when(urlMappingRepository.findByOriginalUrlAndCreatedById(mockOriginalUrl, 1L)).thenReturn(null);
 
     try (MockedStatic<UrlSafeIdGenerator> urlSafeIdGenerator = mockStatic(UrlSafeIdGenerator.class)) {
       urlSafeIdGenerator.when(() -> UrlSafeIdGenerator.generateUrlSafeString(6))
-          .thenReturn("abc111", "abc222", "abc333");
+          .thenReturn("aaa111", "bbb222", "ccc333");
 
       when(urlMappingRepository.existsById(any())).thenReturn(true);
 
       assertThrows(UrlShortenExceedMaxAttemptsException.class,
-          () -> urlMappingService.createUrlMapping("http://localhost.com", claims));
+          () -> urlMappingService.createUrlMapping(mockOriginalUrl, claims));
     }
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void retrieveOriginalUrl_ShouldThrowException_whenNotFound() {
+  void retrieveOriginalUrl_whenNotFound_shouldThrowException() {
     Claims claims = mock(Claims.class);
     when(claims.getSubject()).thenReturn("1");
-    when(urlMappingRepository.findByShortUrlPathAndCreatedById("abc123", 1L)).thenReturn(null);
 
-    assertThrows(UrlMappingNotFoundException.class, () -> urlMappingService.retrieveOriginalUrl("abc123", claims));
+    String path = "abc123";
+
+    when(urlMappingRepository.findByShortUrlPathAndCreatedById(path, 1L)).thenReturn(null);
+
+    assertThrows(UrlMappingNotFoundException.class, () -> urlMappingService.retrieveOriginalUrl(path, claims));
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void retrieveOriginalUrl_ShouldReturnOriginalUrl() {
+  void retrieveOriginalUrl_shouldReturnOriginalUrl() {
     Claims claims = mock(Claims.class);
     when(claims.getSubject()).thenReturn("1");
 
     UrlMapping urlMapping = UrlMapping.builder()
-        .originalUrl("http://localhost.com")
+        .originalUrl(mockOriginalUrl)
         .build();
 
-    when(urlMappingRepository.findByShortUrlPathAndCreatedById("abc123", 1L)).thenReturn(urlMapping);
+    String path = "abc123";
 
-    String result = urlMappingService.retrieveOriginalUrl("abc123", claims);
+    when(urlMappingRepository.findByShortUrlPathAndCreatedById(path, 1L)).thenReturn(urlMapping);
 
-    assertEquals("http://localhost.com", result);
+    String result = urlMappingService.retrieveOriginalUrl(path, claims);
+
+    assertEquals(mockOriginalUrl, result);
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void listShortUrls_ShouldThrowException_whenNoPermission() {
+  void listShortUrls_withoutPermission_shouldThrowException() {
     Claims claims = mock(Claims.class);
-    when(claims.get("LIST_URL_MAPPING", Integer.class)).thenReturn(null);
+    when(claims.get(UrlPermission.LIST_URL_MAPPING, Integer.class)).thenReturn(null);
 
     assertThrows(InsufficientPermissionException.class,
         () -> urlMappingService.listShortUrls(PageRequest.of(0, 10), claims));
@@ -166,14 +184,17 @@ final class UrlMappingServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void listShortUrls_ShouldReturnShortUrlSlice() {
+  void listShortUrls_shouldReturnShortUrlSlice() {
     Claims claims = mock(Claims.class);
-    when(claims.get("LIST_URL_MAPPING", Integer.class)).thenReturn(1);
+    when(claims.get(UrlPermission.LIST_URL_MAPPING, Integer.class)).thenReturn(1);
     when(claims.getSubject()).thenReturn("1");
 
+    String path1 = "aaa111";
+    String path2 = "bbb222";
+
     List<UrlMapping> list = List.of(
-        UrlMapping.builder().shortUrlPath("abc111").build(),
-        UrlMapping.builder().shortUrlPath("abc222").build());
+        UrlMapping.builder().shortUrlPath(path1).build(),
+        UrlMapping.builder().shortUrlPath(path2).build());
 
     Slice<UrlMapping> slice = new SliceImpl<>(list);
 
@@ -181,15 +202,15 @@ final class UrlMappingServiceImplTests {
 
     Slice<String> result = urlMappingService.listShortUrls(PageRequest.of(0, 10), claims);
 
-    assertEquals(List.of("http://localhost/r/abc111", "http://localhost/r/abc222"), result.getContent());
+    assertEquals(List.of(redirectBaseUrl + path1, redirectBaseUrl + path2), result.getContent());
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
-  void removeUrlMapping_ShouldThrowException_whenNoPermission() {
+  void removeUrlMapping_withoutPermission_shouldThrowException() {
     Claims claims = mock(Claims.class);
-    when(claims.get("DELETE_URL_MAPPING", Integer.class)).thenReturn(null);
+    when(claims.get(UrlPermission.DELETE_URL_MAPPING, Integer.class)).thenReturn(null);
 
     assertThrows(InsufficientPermissionException.class,
         () -> urlMappingService.removeUrlMapping("abc123", claims));
@@ -198,14 +219,16 @@ final class UrlMappingServiceImplTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void removeUrlMapping_ShouldCallRepository() {
+  void removeUrlMapping_shouldCallRepositoryDelete() {
     Claims claims = mock(Claims.class);
-    when(claims.get("DELETE_URL_MAPPING", Integer.class)).thenReturn(1);
+    when(claims.get(UrlPermission.DELETE_URL_MAPPING, Integer.class)).thenReturn(1);
     when(claims.getSubject()).thenReturn("1");
 
-    urlMappingService.removeUrlMapping("abc123", claims);
+    String path = "abc123";
 
-    verify(urlMappingRepository).deleteByShortUrlPathAndCreatedById("abc123", 1L);
+    urlMappingService.removeUrlMapping(path, claims);
+
+    verify(urlMappingRepository).deleteByShortUrlPathAndCreatedById(path, 1L);
   }
 
 }

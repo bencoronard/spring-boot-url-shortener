@@ -14,6 +14,7 @@ import dev.hireben.url_shortener.url.entity.UrlMapping;
 import dev.hireben.url_shortener.url.exception.UrlMappingNotFoundException;
 import dev.hireben.url_shortener.url.exception.UrlShortenExceedMaxAttemptsException;
 import dev.hireben.url_shortener.url.repository.UrlMappingRepository;
+import dev.hireben.url_shortener.url.utility.UrlPermission;
 import dev.hireben.url_shortener.url.utility.UrlSafeIdGenerator;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
   @Transactional
   public String createUrlMapping(String originalUrl, Claims authClaims) {
 
-    Integer permissionValue = authClaims.get("CREATE_URL_MAPPING", Integer.class);
+    Integer permissionValue = authClaims.get(UrlPermission.CREATE_URL_MAPPING, Integer.class);
     if (permissionValue == null) {
       throw new InsufficientPermissionException("Not allowed to create short URLs");
     }
@@ -94,7 +95,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
   @Transactional(readOnly = true)
   public Slice<String> listShortUrls(Pageable pageable, Claims authClaims) {
 
-    Integer permissionValue = authClaims.get("LIST_URL_MAPPING", Integer.class);
+    Integer permissionValue = authClaims.get(UrlPermission.LIST_URL_MAPPING, Integer.class);
     if (permissionValue == null) {
       throw new InsufficientPermissionException("Not allowed to list short URLs");
     }
@@ -117,7 +118,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
   @Transactional
   public void removeUrlMapping(String shortUrlPath, Claims authClaims) {
 
-    Integer permissionValue = authClaims.get("DELETE_URL_MAPPING", Integer.class);
+    Integer permissionValue = authClaims.get(UrlPermission.DELETE_URL_MAPPING, Integer.class);
     if (permissionValue == null) {
       throw new InsufficientPermissionException("Not allowed to delete short URLs");
     }
