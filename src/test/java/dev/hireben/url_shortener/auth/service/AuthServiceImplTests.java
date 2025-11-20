@@ -46,54 +46,63 @@ final class AuthServiceImplTests {
 
   // =============================================================================
 
+  private static final String dummyHash = "dummyH@sh";
+  private static final String mockValidEmail = "user@hireben.dev";
+  private static final String mockValidEmailInCaps = "USER@hireben.dev";
+  private static final String mockValidPassword = "P@ssw0rd";
+  private static final String mockPasswordHash = "P@ssw0rdH@sh";
+  private static final String mockToken = "t0ken";
+
+  // =============================================================================
+
   @BeforeEach
   void setup() {
     ReflectionTestUtils.setField(authService, "tokenTtlInSec", 30);
-    ReflectionTestUtils.setField(authService, "dummyPasswordHash", "dummyH@sh");
+    ReflectionTestUtils.setField(authService, "dummyPasswordHash", dummyHash);
   }
 
   // =============================================================================
 
   @Test
   void register_withExistingEmail_shouldThrowException() {
-    when(userRepository.existsByEmail("user@hireben.dev")).thenReturn(true);
+    when(userRepository.existsByEmail(mockValidEmail)).thenReturn(true);
 
-    assertThrows(UserAlreadyExistsException.class, () -> authService.register("USER@hireben.dev", "P@ssw0rd"));
+    assertThrows(UserAlreadyExistsException.class, () -> authService.register(mockValidEmailInCaps, mockValidPassword));
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
   void register_withNewEmail_shouldCreateNewUser() {
-    when(userRepository.existsByEmail("user@hireben.dev")).thenReturn(false);
-    when(passwordEncoder.encode("P@ssw0rd")).thenReturn("H@shedP@ssw0rd");
+    when(userRepository.existsByEmail(mockValidEmail)).thenReturn(false);
+    when(passwordEncoder.encode(mockValidPassword)).thenReturn(mockPasswordHash);
 
-    authService.register("USER@hireben.dev", "P@ssw0rd");
+    authService.register(mockValidEmailInCaps, mockValidPassword);
 
     verify(userRepository).save(
-        argThat(user -> user.getEmail().equals("user@hireben.dev") && user.getPassword().equals("H@shedP@ssw0rd")));
+        argThat(user -> user.getEmail().equals(mockValidEmail) && user.getPassword().equals(mockPasswordHash)));
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
   void login_withNonExistentEmail_shouldThrowException() {
-    when(userRepository.findByEmail("user@hireben.dev")).thenReturn(null);
-    when(passwordEncoder.matches("P@ssw0rd", "dummyH@sh")).thenReturn(false);
+    when(userRepository.findByEmail(mockValidEmail)).thenReturn(null);
+    when(passwordEncoder.matches(mockValidPassword, dummyHash)).thenReturn(false);
 
-    assertThrows(InvalidCredentialsException.class, () -> authService.login("USER@hireben.dev", "P@ssw0rd"));
+    assertThrows(InvalidCredentialsException.class, () -> authService.login(mockValidEmailInCaps, mockValidPassword));
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
   void login_withIncorrectPassword_shouldThrowException() {
-    User user = User.builder().email("user@hireben.dev").password("H@shedP@ssw0rd").build();
+    User user = User.builder().email(mockValidEmail).password(mockPasswordHash).build();
 
-    when(userRepository.findByEmail("user@hireben.dev")).thenReturn(user);
-    when(passwordEncoder.matches("P@ssw0rd", "H@shedP@ssw0rd")).thenReturn(false);
+    when(userRepository.findByEmail(mockValidEmail)).thenReturn(user);
+    when(passwordEncoder.matches(mockValidPassword, mockPasswordHash)).thenReturn(false);
 
-    assertThrows(InvalidCredentialsException.class, () -> authService.login("USER@hireben.dev", "P@ssw0rd"));
+    assertThrows(InvalidCredentialsException.class, () -> authService.login(mockValidEmailInCaps, mockValidPassword));
   }
 
   // -----------------------------------------------------------------------------
@@ -102,34 +111,35 @@ final class AuthServiceImplTests {
   void login_withValidCredentials_shouldReturnToken() {
     User user = User.builder()
         .id(1L)
-        .email("user@hireben.dev")
-        .password("H@shedP@ssw0rd")
+        .email(mockValidEmail)
+        .password(mockPasswordHash)
         .build();
 
-    when(userRepository.findByEmail("user@hireben.dev")).thenReturn(user);
-    when(passwordEncoder.matches("P@ssw0rd", "H@shedP@ssw0rd")).thenReturn(true);
+    when(userRepository.findByEmail(mockValidEmail)).thenReturn(user);
+    when(passwordEncoder.matches(mockValidPassword, mockPasswordHash)).thenReturn(true);
 
     Permission p1 = Permission.builder().permission("ACTION_1").build();
     Permission p2 = Permission.builder().permission("ACTION_2").build();
 
     when(permissionRepository.findAll()).thenReturn(List.of(p1, p2));
-    when(jwtIssuer.issueToken(eq("1"), isNull(), anyMap(), eq(Duration.ofSeconds(30L)), isNull())).thenReturn("jwt");
+    when(jwtIssuer.issueToken(eq("1"), isNull(), anyMap(), eq(Duration.ofSeconds(30L)), isNull()))
+        .thenReturn(mockToken);
 
-    String token = authService.login("USER@hireben.dev", "P@ssw0rd");
+    String token = authService.login(mockValidEmailInCaps, mockValidPassword);
 
-    assertEquals("jwt", token);
+    assertEquals(mockToken, token);
   }
 
   // -----------------------------------------------------------------------------
 
   @Test
   void login_withNonExistentEmail_shouldPerformHashingAndThrowException() {
-    when(userRepository.findByEmail("user@hireben.dev")).thenReturn(null);
-    when(passwordEncoder.matches("P@ssw0rd", "dummyH@sh")).thenReturn(false);
+    when(userRepository.findByEmail(mockValidEmail)).thenReturn(null);
+    when(passwordEncoder.matches(mockValidPassword, dummyHash)).thenReturn(false);
 
-    assertThrows(InvalidCredentialsException.class, () -> authService.login("USER@hireben.dev", "P@ssw0rd"));
+    assertThrows(InvalidCredentialsException.class, () -> authService.login(mockValidEmailInCaps, mockValidPassword));
 
-    verify(passwordEncoder).matches("P@ssw0rd", "dummyH@sh");
+    verify(passwordEncoder).matches(mockValidPassword, dummyHash);
   }
 
 }
