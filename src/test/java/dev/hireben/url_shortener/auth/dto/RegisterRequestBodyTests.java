@@ -5,6 +5,9 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.ConstraintViolation;
@@ -19,10 +22,10 @@ final class RegisterRequestBodyTests {
   // =============================================================================
 
   @Test
-  void validRegisterRequestBody_ShouldPassValidation() {
+  void validRegisterRequestBody_shouldPassValidation() {
     RegisterRequestBody body = new RegisterRequestBody(
-        "user@example.com",
-        "StrongP@ssword1");
+        "user@hireben.dev",
+        "P@ssw0rd");
 
     Set<ConstraintViolation<RegisterRequestBody>> violations = validator.validate(body);
 
@@ -32,10 +35,10 @@ final class RegisterRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void blankEmail_ShouldFailValidation() {
+  void blankEmail_shouldFailValidation() {
     RegisterRequestBody body = new RegisterRequestBody(
         " ",
-        "StrongP@ssword1");
+        "P@ssw0rd");
 
     Set<ConstraintViolation<RegisterRequestBody>> violations = validator.validate(body);
 
@@ -49,10 +52,10 @@ final class RegisterRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void invalidEmailFormat_ShouldFailValidation() {
+  void invalidEmailFormat_shouldFailValidation() {
     RegisterRequestBody body = new RegisterRequestBody(
         "invalid-email",
-        "StrongP@ssword1");
+        "P@ssw0rd");
 
     Set<ConstraintViolation<RegisterRequestBody>> violations = validator.validate(body);
 
@@ -66,9 +69,9 @@ final class RegisterRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void blankPassword_ShouldFailValidation() {
+  void blankPassword_shouldFailValidation() {
     RegisterRequestBody body = new RegisterRequestBody(
-        "user@example.com",
+        "user@hireben.dev",
         " ");
 
     Set<ConstraintViolation<RegisterRequestBody>> violations = validator.validate(body);
@@ -85,11 +88,11 @@ final class RegisterRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void invalidPasswordPattern_ShouldFailValidation() {
+  void invalidPasswordPattern_shouldFailValidation() {
     // Missing uppercase and special character
     RegisterRequestBody body = new RegisterRequestBody(
-        "user@example.com",
-        "password1");
+        "user@hireben.dev",
+        "password");
 
     Set<ConstraintViolation<RegisterRequestBody>> violations = validator.validate(body);
 
@@ -104,18 +107,18 @@ final class RegisterRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void jsonDeserialization_ShouldCreateCorrectObject() throws Exception {
+  void deserializeJson_shouldCreateCorrectObject() throws JsonMappingException, JsonProcessingException {
     String json = """
         {
-          "email": "user@example.com",
-          "password": "StrongP@ssword1"
+          "email": "user@hireben.dev",
+          "password": "P@ssw0rd"
         }
         """;
 
     RegisterRequestBody body = objectMapper.readValue(json, RegisterRequestBody.class);
 
-    Assertions.assertThat(body.email()).isEqualTo("user@example.com");
-    Assertions.assertThat(body.password()).isEqualTo("StrongP@ssword1");
+    Assertions.assertThat(body.email()).isEqualTo("user@hireben.dev");
+    Assertions.assertThat(body.password()).isEqualTo("P@ssw0rd");
   }
 
 }

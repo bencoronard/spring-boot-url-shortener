@@ -4,6 +4,9 @@ import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.ConstraintViolation;
@@ -18,8 +21,8 @@ final class LoginRequestBodyTests {
   // =============================================================================
 
   @Test
-  void validLoginRequestBody_ShouldPassValidation() {
-    LoginRequestBody body = new LoginRequestBody("user@example.com", "password123");
+  void validLoginRequestBody_shouldPassValidation() {
+    LoginRequestBody body = new LoginRequestBody("user@hireben.dev", "P@ssw0rd");
 
     Set<ConstraintViolation<LoginRequestBody>> violations = validator.validate(body);
 
@@ -29,8 +32,8 @@ final class LoginRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void blankEmail_ShouldFailValidation() {
-    LoginRequestBody body = new LoginRequestBody(" ", "password123");
+  void blankEmail_shouldFailValidation() {
+    LoginRequestBody body = new LoginRequestBody(" ", "P@ssw0rd");
 
     Set<ConstraintViolation<LoginRequestBody>> violations = validator.validate(body);
 
@@ -44,8 +47,8 @@ final class LoginRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void blankPassword_ShouldFailValidation() {
-    LoginRequestBody body = new LoginRequestBody("user@example.com", " ");
+  void blankPassword_shouldFailValidation() {
+    LoginRequestBody body = new LoginRequestBody("user@hireben.dev", " ");
 
     Set<ConstraintViolation<LoginRequestBody>> violations = validator.validate(body);
 
@@ -59,18 +62,18 @@ final class LoginRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void jsonDeserialization_ShouldCreateCorrectObject() throws Exception {
+  void deserializeJson_shouldCreateCorrectObject() throws JsonMappingException, JsonProcessingException {
     String json = """
         {
-          "email": "user@example.com",
-          "password": "secret"
+          "email": "user@hireben.dev",
+          "password": "P@ssw0rd"
         }
         """;
 
     LoginRequestBody body = objectMapper.readValue(json, LoginRequestBody.class);
 
-    Assertions.assertThat(body.email()).isEqualTo("user@example.com");
-    Assertions.assertThat(body.password()).isEqualTo("secret");
+    Assertions.assertThat(body.email()).isEqualTo("user@hireben.dev");
+    Assertions.assertThat(body.password()).isEqualTo("P@ssw0rd");
   }
 
 }

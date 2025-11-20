@@ -5,6 +5,9 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.ConstraintViolation;
@@ -19,8 +22,8 @@ final class ShortenUrlRequestBodyTests {
   // =============================================================================
 
   @Test
-  void validUrl_ShouldPassValidation() {
-    ShortenUrlRequestBody body = new ShortenUrlRequestBody("https://example.com");
+  void validUrl_shouldPassValidation() {
+    ShortenUrlRequestBody body = new ShortenUrlRequestBody("https://localhost.com");
 
     Set<ConstraintViolation<ShortenUrlRequestBody>> violations = validator.validate(body);
 
@@ -30,13 +33,13 @@ final class ShortenUrlRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void blankUrl_ShouldFailValidation() {
+  void blankUrl_shouldFailValidation() {
     ShortenUrlRequestBody body = new ShortenUrlRequestBody(" ");
 
     Set<ConstraintViolation<ShortenUrlRequestBody>> violations = validator.validate(body);
 
     // Expect multiple violations: NotBlank and Pattern both might trigger
-    var messages = violations.stream()
+    Set<String> messages = violations.stream()
         .map(ConstraintViolation::getMessage)
         .collect(Collectors.toSet());
 
@@ -47,12 +50,12 @@ final class ShortenUrlRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void urlWithoutHttp_ShouldFailValidation() {
-    ShortenUrlRequestBody body = new ShortenUrlRequestBody("www.example.com");
+  void urlWithoutHttp_shouldFailValidation() {
+    ShortenUrlRequestBody body = new ShortenUrlRequestBody("localhost.com");
 
     Set<ConstraintViolation<ShortenUrlRequestBody>> violations = validator.validate(body);
 
-    var messages = violations.stream()
+    Set<String> messages = violations.stream()
         .map(ConstraintViolation::getMessage)
         .collect(Collectors.toSet());
 
@@ -62,13 +65,13 @@ final class ShortenUrlRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void urlTooLong_ShouldFailValidation() {
-    String longUrl = "https://" + "a".repeat(250) + ".com"; // >255 total length
+  void urlTooLong_shouldFailValidation() {
+    String longUrl = "https://" + "localhost".repeat(250) + ".com"; // >255 total length
     ShortenUrlRequestBody body = new ShortenUrlRequestBody(longUrl);
 
     Set<ConstraintViolation<ShortenUrlRequestBody>> violations = validator.validate(body);
 
-    var messages = violations.stream()
+    Set<String> messages = violations.stream()
         .map(ConstraintViolation::getMessage)
         .collect(Collectors.toSet());
 
@@ -78,16 +81,16 @@ final class ShortenUrlRequestBodyTests {
   // -----------------------------------------------------------------------------
 
   @Test
-  void jsonDeserialization_ShouldMapOriginalUrl() throws Exception {
+  void deserializeJson_shouldCreateCorrectObject() throws JsonMappingException, JsonProcessingException {
     String json = """
         {
-          "original_url": "https://example.org/path"
+          "original_url": "https://localhost.com"
         }
         """;
 
     ShortenUrlRequestBody body = objectMapper.readValue(json, ShortenUrlRequestBody.class);
 
-    Assertions.assertThat(body.originalUrl()).isEqualTo("https://example.org/path");
+    Assertions.assertThat(body.originalUrl()).isEqualTo("https://localhost.com");
   }
 
 }

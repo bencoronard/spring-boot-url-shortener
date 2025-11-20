@@ -11,13 +11,13 @@ final class ShortenUrlResponseBodyTests {
   // =============================================================================
 
   @Test
-  void serialization_ShouldProduceCorrectJson() throws Exception {
-    ShortenUrlResponseBody body = new ShortenUrlResponseBody("https://short.ly/abc123");
+  void serializeObject_shouldCreateCorrectJson() throws Exception {
+    ShortenUrlResponseBody body = new ShortenUrlResponseBody("http://localhost/r/abc123");
 
     String json = objectMapper.writeValueAsString(body);
 
     // Verify JSON contains correct property name and value
-    Assertions.assertThat(json).contains("\"short_url\":\"https://short.ly/abc123\"");
+    Assertions.assertThat(json).contains("\"short_url\":\"http://localhost/r/abc123\"");
     Assertions.assertThat(json).doesNotContain("shortUrl");
   }
 
