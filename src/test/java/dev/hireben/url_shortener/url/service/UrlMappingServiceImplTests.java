@@ -208,7 +208,7 @@ final class UrlMappingServiceImplTests {
     when(claims.get(UrlPermission.DELETE_URL_MAPPING, Integer.class)).thenReturn(null);
 
     assertThrows(InsufficientPermissionException.class,
-        () -> urlMappingService.removeUrlMapping("abc123", claims));
+        () -> urlMappingService.removeUrlMapping(mockShortUrlPath1, claims));
   }
 
   // -----------------------------------------------------------------------------
