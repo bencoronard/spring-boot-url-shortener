@@ -34,6 +34,9 @@ spring:
       pageable:
         max-page-size: "${URL_SHORTENER_PAGINATION_MAX_SIZE}"
   datasource:
+    url: "jdbc:postgresql://${pg.host}:${pg.port}/${pg.dbname}"
+    username: "${pg.user}"
+    password: "${pg.pass}"
     hikari:
       pool-name: UrlShortenerHikariCP
       maximum-pool-size: "${URL_SHORTENER_DB_CP_CAP}"
@@ -49,7 +52,6 @@ management:
         include:
         - health
         - info
-        - metrics
   info:
     env:
       enabled: true
