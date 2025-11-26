@@ -26,7 +26,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
   private final UrlMappingRepository urlMappingRepository;
   private final UserRepository userRepository;
 
-  private static final String shortUrlFormat = "%s/r/%s";
+  private static final String SHORT_URL_FORMAT = "%s/r/%s";
 
   @Value("${internal.host.external-url}")
   private String hostExternalUrl;
@@ -48,7 +48,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
 
     UrlMapping existingUrlMapping = urlMappingRepository.findByOriginalUrlAndCreatedById(originalUrl, userId);
     if (existingUrlMapping != null) {
-      return String.format(shortUrlFormat, hostExternalUrl, existingUrlMapping.getShortUrlPath());
+      return String.format(SHORT_URL_FORMAT, hostExternalUrl, existingUrlMapping.getShortUrlPath());
     }
 
     for (int i = 0; i < idGenMaxAttempt; i++) {
@@ -65,7 +65,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
 
         urlMappingRepository.save(newUrlMapping);
 
-        return String.format(shortUrlFormat, hostExternalUrl, newShortUrlPath);
+        return String.format(SHORT_URL_FORMAT, hostExternalUrl, newShortUrlPath);
       }
     }
 
@@ -83,7 +83,7 @@ class UrlMappingServiceImpl implements UrlMappingService {
 
     if (existingUrlMapping == null) {
       throw new UrlMappingNotFoundException(
-          String.format("No URL mapping found for " + shortUrlFormat, hostExternalUrl, shortUrlPath));
+          String.format("No URL mapping found for " + SHORT_URL_FORMAT, hostExternalUrl, shortUrlPath));
     }
 
     return existingUrlMapping.getOriginalUrl();
@@ -103,13 +103,11 @@ class UrlMappingServiceImpl implements UrlMappingService {
     Slice<UrlMapping> urlMappingSlice = urlMappingRepository.findAllByCreatedById(pageable,
         Long.parseLong(authClaims.getSubject()));
 
-    Slice<String> shortUrlSlice = new SliceImpl<>(
+    return new SliceImpl<>(
         urlMappingSlice.getContent().stream().map(
-            mapping -> String.format(shortUrlFormat, hostExternalUrl, mapping.getShortUrlPath())).toList(),
+            mapping -> String.format(SHORT_URL_FORMAT, hostExternalUrl, mapping.getShortUrlPath())).toList(),
         urlMappingSlice.getPageable(),
         urlMappingSlice.hasNext());
-
-    return shortUrlSlice;
   }
 
   // -----------------------------------------------------------------------------
